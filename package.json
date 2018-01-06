@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "React wrapper for the official Nimiq API for mining and wallet functions.",
   "main": "build/index.js",
+  "license": "MIT",
   "peerDependencies": {
     "react": "^15.5.4"
   },
