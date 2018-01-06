@@ -9,7 +9,8 @@
   "dependencies": {
     "react": "^15.5.4",
     "webpack": "^2.6.1",
-    "react-load-script":"^0.0.6"
+    "react-load-script":"^0.0.6",
+    "react-scripts": "1.0.17"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
