@@ -5,12 +5,38 @@ class NimiqMain extends Component {
     super(props);
     this.state = {
       nimiqStatus: null,
+      myWalletAddress: this.props.myWalletAddress ? this.props.myWalletAddress : null,
+      consensus: null,
+      heads: null,
+      peers: null,
+      myWalletBalance: null,
+      error: null,
     };
   }
 
-  initialize = (clientType='light') => {
-    window.Nimiq.init(async function () {
-      // this.setState({ nimiqStatus: 'window.Nimiq loaded. Connecting and establishing consensus.' })
+  handleError = (e) => {
+    this.setState({ error: e })
+  }
+
+  handleConsensusEstablished = () => {
+    this.setState({ consensus: 'established' })
+  }
+
+  handleConsensusLost = () => {
+    this.setState({ consensus: 'lost' })
+  }
+
+  handleHeadChange = () => {
+    this.setState({ heads: 1 })
+  }
+
+  handlePeerChange = () => {
+    this.setState({ peers: 1 })
+  }
+
+  initialize = (clientType = 'light') => {
+    window.Nimiq.init(async () => {
+      this.setState({ nimiqStatus: 'window.Nimiq loaded. Connecting and establishing consensus.' })
       const $ = {};
       window.$ = $;
       if (clientType === 'full') {
@@ -20,35 +46,30 @@ class NimiqMain extends Component {
       } else if (clientType === 'nano') {
         $.consensus = await window.Nimiq.Consensus.nano();
       }
-
       $.blockchain = $.consensus.blockchain;
       $.mempool = $.consensus.mempool;
       $.network = $.consensus.network;
-
       $.wallet = await window.Nimiq.Wallet.getPersistent();
       if (clientType !== 'nano') {
         // the nano client does not sync the full account info and can not mine.
         $.accounts = $.blockchain.accounts;
-        $.miner = new window.Nimiq.Miner($.blockchain, $.mempool, $.wallet.address);
+        // $.miner = new window.Nimiq.Miner($.blockchain, $.mempool, $.wallet.address);
       }
-
-      $.consensus.on('established', () => console.error('Consensus established'));
-      $.consensus.on('lost', () => console.error('Consensus lost'));
-
-      $.blockchain.on('head-changed', () => console.error('Head Changed'));
-      $.network.on('peers-changed', () => console.error('Peers Changed'));
-
+      $.consensus.on('established', this.handleConsensusEstablished);
+      $.consensus.on('lost', this.handleConsensusLost);
+      $.blockchain.on('head-changed', this.handleHeadChange);
+      $.network.on('peers-changed', this.handlePeerChange);
       $.network.connect();
-    }, function (code) {
+    }, (code) => {
       switch (code) {
         case window.Nimiq.ERR_WAIT:
-          console.log('Error: Already open in another tab or window.');
+          this.handleError('Error: Already open in another tab or window.');
           break;
         case window.Nimiq.ERR_UNSUPPORTED:
-          console.log('Error: Browser not supported');
+          this.handleError('Error: Browser not supported');
           break;
         default:
-          console.log('Error: window.Nimiq initialization error');
+          this.handleError('Error: window.Nimiq initialization error');
           break;
       }
     });
@@ -59,8 +80,18 @@ class NimiqMain extends Component {
   }
 
   render () {
+    const { nimiqStatus, myWalletAddress, consensus, heads, peers, myWalletBalance, error } = this.state
+
     return (
-      <div>This is so Nimiq1212!</div>
+      <div>
+        <div>{nimiqStatus}</div>
+        <div>{myWalletAddress}</div>
+        <div>{consensus}</div>
+        <div>{heads}</div>
+        <div>{peers}</div>
+        <div>{myWalletBalance}</div>
+        <div>{error}</div>
+      </div>
     );
   }
 }

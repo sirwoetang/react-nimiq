@@ -4220,8 +4220,6 @@ var _react2 = _interopRequireDefault(_react);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
-
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -4234,15 +4232,34 @@ var NimiqMain = function (_Component) {
   _inherits(NimiqMain, _Component);
 
   function NimiqMain(props) {
-    var _this$state;
+    var _this2 = this;
 
     _classCallCheck(this, NimiqMain);
 
     var _this = _possibleConstructorReturn(this, (NimiqMain.__proto__ || Object.getPrototypeOf(NimiqMain)).call(this, props));
 
+    _this.handleError = function (e) {
+      _this.setState({ error: e });
+    };
+
+    _this.handleConsensusEstablished = function () {
+      _this.setState({ consensus: 'established' });
+    };
+
+    _this.handleConsensusLost = function () {
+      _this.setState({ consensus: 'lost' });
+    };
+
+    _this.handleHeadChange = function () {
+      _this.setState({ heads: 1 });
+    };
+
+    _this.handlePeerChange = function () {
+      _this.setState({ peers: 1 });
+    };
+
     _this.initialize = function () {
       var clientType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'light';
-
 
       window.Nimiq.init(_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
         var $;
@@ -4250,9 +4267,7 @@ var NimiqMain = function (_Component) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                console.log('POEs', clientType);
-                // this.setState({ nimiqStatus: 'window.Nimiq loaded. Connecting and establishing consensus.' })
-                // console.log('POEs', this.state)
+                _this.setState({ nimiqStatus: 'window.Nimiq loaded. Connecting and establishing consensus.' });
                 $ = {};
 
                 window.$ = $;
@@ -4297,11 +4312,9 @@ var NimiqMain = function (_Component) {
                 $.consensus = _context.sent;
 
               case 19:
-
                 $.blockchain = $.consensus.blockchain;
                 $.mempool = $.consensus.mempool;
                 $.network = $.consensus.network;
-
                 _context.next = 24;
                 return window.Nimiq.Wallet.getPersistent();
 
@@ -4311,23 +4324,12 @@ var NimiqMain = function (_Component) {
                 if (clientType !== 'nano') {
                   // the nano client does not sync the full account info and can not mine.
                   $.accounts = $.blockchain.accounts;
-                  $.miner = new window.Nimiq.Miner($.blockchain, $.mempool, $.wallet.address);
+                  // $.miner = new window.Nimiq.Miner($.blockchain, $.mempool, $.wallet.address);
                 }
-
-                $.consensus.on('established', function () {
-                  return console.error('Consensus established');
-                });
-                $.consensus.on('lost', function () {
-                  return console.error('Consensus lost');
-                });
-
-                $.blockchain.on('head-changed', function () {
-                  return console.error('Head Changed');
-                });
-                $.network.on('peers-changed', function () {
-                  return console.error('Peers Changed');
-                });
-
+                $.consensus.on('established', _this.handleConsensusEstablished);
+                $.consensus.on('lost', _this.handleConsensusLost);
+                $.blockchain.on('head-changed', _this.handleHeadChange);
+                $.network.on('peers-changed', _this.handlePeerChange);
                 $.network.connect();
 
               case 31:
@@ -4335,26 +4337,31 @@ var NimiqMain = function (_Component) {
                 return _context.stop();
             }
           }
-        }, _callee, this);
+        }, _callee, _this2);
       })), function (code) {
-        console.log(code);
         switch (code) {
           case window.Nimiq.ERR_WAIT:
-            console.log('Error: Already open in another tab or window.');
+            _this.handleError('Error: Already open in another tab or window.');
             break;
           case window.Nimiq.ERR_UNSUPPORTED:
-            console.log('Error: Browser not supported');
+            _this.handleError('Error: Browser not supported');
             break;
           default:
-            console.log('Error: window.Nimiq initialization error');
+            _this.handleError('Error: window.Nimiq initialization error');
             break;
         }
       });
     };
 
-    _this.state = (_this$state = {
-      nimiqStatus: null
-    }, _defineProperty(_this$state, 'nimiqStatus', null), _defineProperty(_this$state, 'nimiqStatus', null), _defineProperty(_this$state, 'nimiqStatus', null), _this$state);
+    _this.state = {
+      nimiqStatus: null,
+      myWalletAddress: _this.props.myWalletAddress ? _this.props.myWalletAddress : null,
+      consensus: null,
+      heads: null,
+      peers: null,
+      myWalletBalance: null,
+      error: null
+    };
     return _this;
   }
 
@@ -4366,10 +4373,54 @@ var NimiqMain = function (_Component) {
   }, {
     key: 'render',
     value: function render() {
+      var _state = this.state,
+          nimiqStatus = _state.nimiqStatus,
+          myWalletAddress = _state.myWalletAddress,
+          consensus = _state.consensus,
+          heads = _state.heads,
+          peers = _state.peers,
+          myWalletBalance = _state.myWalletBalance,
+          error = _state.error;
+
+
       return _react2.default.createElement(
         'div',
         null,
-        'This is so Nimiq1212!'
+        _react2.default.createElement(
+          'div',
+          null,
+          nimiqStatus
+        ),
+        _react2.default.createElement(
+          'div',
+          null,
+          myWalletAddress
+        ),
+        _react2.default.createElement(
+          'div',
+          null,
+          consensus
+        ),
+        _react2.default.createElement(
+          'div',
+          null,
+          heads
+        ),
+        _react2.default.createElement(
+          'div',
+          null,
+          peers
+        ),
+        _react2.default.createElement(
+          'div',
+          null,
+          myWalletBalance
+        ),
+        _react2.default.createElement(
+          'div',
+          null,
+          error
+        )
       );
     }
   }]);
