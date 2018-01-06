@@ -1,7 +1,7 @@
 {
   "name": "react-nimiq",
   "version": "0.0.1",
-  "description": "React wrapper for the official Nimiq API",
+  "description": "React wrapper for the official Nimiq API for mining and wallet functions.",
   "main": "build/index.js",
   "peerDependencies": {
     "react": "^15.5.4"
@@ -17,8 +17,8 @@
     "build": "webpack"
   },
   "author": {
-    "name": "",
-    "email": ""
+    "name": "Sirwoetang",
+    "email": "wakkerakker@gmail.com"
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
