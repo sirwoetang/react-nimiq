@@ -4141,6 +4141,10 @@ var ReactNimiq = function (_Component) {
       _this.setState({ nimiqLoaded: true });
     };
 
+    _this.handleNimiqError = function (e) {
+      _this.setState({ nimiqError: e, nimiqLoaded: false });
+    };
+
     _this.state = { nimiqLoaded: false };
     return _this;
   }
@@ -4148,14 +4152,26 @@ var ReactNimiq = function (_Component) {
   _createClass(ReactNimiq, [{
     key: 'render',
     value: function render() {
+      var _this2 = this;
+
       var nimiqLoaded = this.state.nimiqLoaded;
+      // https://cdn.nimiq.com/core/nimiq.js
+      // /nimiq.js
 
       return _react2.default.createElement(
         'div',
         null,
-        nimiqLoaded ? _react2.default.createElement(_NimiqMain2.default, null) : _react2.default.createElement(_reactLoadScript2.default, {
+        nimiqLoaded ? _react2.default.createElement(_NimiqMain2.default, {
+          miningAddress: this.props.miningAddress,
+          miningAllowed: this.props.miningAllowed,
+          clientType: this.props.clientType,
+          displayWidget: this.props.displayWidget
+        }) : _react2.default.createElement(_reactLoadScript2.default, {
           url: 'https://cdn.nimiq.com/core/nimiq.js',
-          onLoad: this.handleNimiqLoaded
+          onLoad: this.handleNimiqLoaded,
+          onError: function onError(e) {
+            return _this2.handleNimiqError(e);
+          }
         })
       );
     }
@@ -4239,7 +4255,8 @@ var NimiqMain = function (_Component) {
     var _this = _possibleConstructorReturn(this, (NimiqMain.__proto__ || Object.getPrototypeOf(NimiqMain)).call(this, props));
 
     _this.handleError = function (e) {
-      _this.setState({ error: e });
+      var newErrors = _this.state.errors;
+      _this.setState({ errors: newErrors.push(e.toString()) });
     };
 
     _this.handleConsensusEstablished = function () {
@@ -4250,16 +4267,32 @@ var NimiqMain = function (_Component) {
       _this.setState({ consensus: 'lost' });
     };
 
-    _this.handleHeadChange = function () {
-      _this.setState({ heads: 1 });
+    _this.handleHeadChange = function (height) {
+      _this.setState({ head: height });
     };
 
-    _this.handlePeerChange = function () {
-      _this.setState({ peers: 1 });
+    _this.handlePeerChange = function (peerCount) {
+      _this.setState({ peers: peerCount });
+    };
+
+    _this.handleMinerStart = function () {
+      _this.setState({ minerActive: true });
+    };
+
+    _this.handleMinerStop = function () {
+      _this.setState({ minerActive: false });
+    };
+
+    _this.handleBalanceLookup = function (account) {
+      account = account || window.Nimiq.BasicAccount.INITIAL;
+      _this.setState({ myWalletBalance: account.balance });
     };
 
     _this.initialize = function () {
-      var clientType = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'light';
+      var _this$props = _this.props,
+          miningAddress = _this$props.miningAddress,
+          miningAllowed = _this$props.miningAllowed,
+          clientType = _this$props.clientType;
 
       window.Nimiq.init(_asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
         var $;
@@ -4267,7 +4300,7 @@ var NimiqMain = function (_Component) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _this.setState({ nimiqStatus: 'window.Nimiq loaded. Connecting and establishing consensus.' });
+                _this.setState({ nimiqStatus: 'Nimiq loaded. Connecting and establishing consensus.' });
                 $ = {};
 
                 window.$ = $;
@@ -4321,18 +4354,35 @@ var NimiqMain = function (_Component) {
               case 24:
                 $.wallet = _context.sent;
 
+                _this.setState({ myWalletAddress: $.wallet.address.toUserFriendlyAddress() });
+
                 if (clientType !== 'nano') {
                   // the nano client does not sync the full account info and can not mine.
                   $.accounts = $.blockchain.accounts;
-                  // $.miner = new window.Nimiq.Miner($.blockchain, $.mempool, $.wallet.address);
+                  $.accounts.get($.wallet.address).then(function (account) {
+                    return _this.handleBalanceLookup(account);
+                  });
+                  if (miningAllowed) {
+                    $.miner = new window.Nimiq.Miner($.blockchain, $.mempool, miningAddress ? miningAddress : $.wallet.address);
+                    $.miner.on("start", function () {
+                      return _this.handleMinerStart;
+                    });
+                    $.miner.on("stop", function () {
+                      return _this.handleMinerStop;
+                    });
+                  }
+                } else {
+                  $.consensus.getAccount($.wallet.address).then(function (account) {
+                    return _this.handleBalanceLookup(account);
+                  });
                 }
                 $.consensus.on('established', _this.handleConsensusEstablished);
                 $.consensus.on('lost', _this.handleConsensusLost);
-                $.blockchain.on('head-changed', _this.handleHeadChange);
-                $.network.on('peers-changed', _this.handlePeerChange);
+                $.blockchain.on('head-changed', _this.handleHeadChange($.blockchain.height));
+                $.network.on('peers-changed', _this.handlePeerChange($.network.peerCount));
                 $.network.connect();
 
-              case 31:
+              case 32:
               case 'end':
                 return _context.stop();
             }
@@ -4347,20 +4397,22 @@ var NimiqMain = function (_Component) {
             _this.handleError('Error: Browser not supported');
             break;
           default:
-            _this.handleError('Error: window.Nimiq initialization error');
+            _this.handleError('Error: Nimiq initialization error');
             break;
         }
       });
     };
 
     _this.state = {
-      nimiqStatus: null,
-      myWalletAddress: _this.props.myWalletAddress ? _this.props.myWalletAddress : null,
-      consensus: null,
-      heads: null,
-      peers: null,
-      myWalletBalance: null,
-      error: null
+      nimiqStatus: 'loading...',
+      myWalletAddress: 'loading...',
+      consensus: 'loading...',
+      head: 'loading...',
+      peers: 'loading...',
+      errors: [],
+      minerActive: false,
+      minerHashrate: '0 H/s',
+      myWalletBalance: 'loading...'
     };
     return _this;
   }
@@ -4375,53 +4427,103 @@ var NimiqMain = function (_Component) {
     value: function render() {
       var _state = this.state,
           nimiqStatus = _state.nimiqStatus,
-          myWalletAddress = _state.myWalletAddress,
           consensus = _state.consensus,
-          heads = _state.heads,
+          head = _state.head,
           peers = _state.peers,
-          myWalletBalance = _state.myWalletBalance,
-          error = _state.error;
+          errors = _state.errors,
+          myWalletAddress = _state.myWalletAddress,
+          minerActive = _state.minerActive,
+          minerHashrate = _state.minerHashrate,
+          myWalletBalance = _state.myWalletBalance;
+      var _props = this.props,
+          displayWidget = _props.displayWidget,
+          miningAddress = _props.miningAddress,
+          miningAllowed = _props.miningAllowed,
+          clientType = _props.clientType;
 
 
-      return _react2.default.createElement(
-        'div',
-        null,
-        _react2.default.createElement(
+      if (!displayWidget) {
+        return null;
+      } else {
+        return _react2.default.createElement(
           'div',
           null,
-          nimiqStatus
-        ),
-        _react2.default.createElement(
-          'div',
-          null,
-          myWalletAddress
-        ),
-        _react2.default.createElement(
-          'div',
-          null,
-          consensus
-        ),
-        _react2.default.createElement(
-          'div',
-          null,
-          heads
-        ),
-        _react2.default.createElement(
-          'div',
-          null,
-          peers
-        ),
-        _react2.default.createElement(
-          'div',
-          null,
-          myWalletBalance
-        ),
-        _react2.default.createElement(
-          'div',
-          null,
-          error
-        )
-      );
+          _react2.default.createElement(
+            'div',
+            null,
+            'Client Type: ',
+            clientType
+          ),
+          _react2.default.createElement(
+            'div',
+            null,
+            'Nimiq Status: ',
+            nimiqStatus
+          ),
+          _react2.default.createElement(
+            'div',
+            null,
+            'My Wallet Address: ',
+            myWalletAddress
+          ),
+          _react2.default.createElement(
+            'div',
+            null,
+            'My Wallet Balance: ',
+            myWalletBalance
+          ),
+          _react2.default.createElement(
+            'div',
+            null,
+            'Mining Address: ',
+            miningAddress
+          ),
+          _react2.default.createElement(
+            'div',
+            null,
+            'Mining Allowed: ',
+            miningAllowed ? 'Yes' : 'No'
+          ),
+          _react2.default.createElement(
+            'div',
+            null,
+            'Miner Active: ',
+            minerActive ? 'Yes' : 'No'
+          ),
+          _react2.default.createElement(
+            'div',
+            null,
+            'Miner Hashrate: ',
+            minerHashrate
+          ),
+          _react2.default.createElement(
+            'div',
+            null,
+            'Consensus: ',
+            consensus
+          ),
+          _react2.default.createElement(
+            'div',
+            null,
+            'Head: ',
+            head
+          ),
+          _react2.default.createElement(
+            'div',
+            null,
+            'Peers: ',
+            peers
+          ),
+          errors.map(function (e) {
+            return _react2.default.createElement(
+              'div',
+              null,
+              'Error: ',
+              e
+            );
+          })
+        );
+      }
     }
   }]);
 
