@@ -4258,13 +4258,11 @@ var NimiqMain = function (_Component) {
     };
 
     _this.handleConsensusEstablished = function () {
-      console.log('starting');
       _this.setState({ consensus: 'established' });
       $.miner.startWork();
     };
 
     _this.handleConsensusLost = function () {
-      console.log('stopping');
       _this.setState({ consensus: 'lost' });
       $.miner.stopWork();
     };

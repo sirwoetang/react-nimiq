@@ -1,7 +1,7 @@
 {
   "name": "react-nimiq",
   "version": "0.0.1",
-  "description": "Put a description here",
+  "description": "React wrapper for the official Nimiq API",
   "main": "build/index.js",
   "peerDependencies": {
     "react": "^15.5.4"
@@ -9,7 +9,8 @@
   "dependencies": {
     "react": "^15.5.4",
     "webpack": "^2.6.1",
-    "react-load-script":"^0.0.6"
+    "react-load-script":"^0.0.6",
+    "pinkie-promise": "2.0.2"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -17,8 +18,8 @@
     "build": "webpack"
   },
   "author": {
-    "name": "Your name",
-    "email": "your email"
+    "name": "",
+    "email": ""
   },
   "devDependencies": {
     "babel-cli": "^6.24.1",
