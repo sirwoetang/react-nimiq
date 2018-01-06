@@ -1,0 +1,1 @@
+Wrapper for the official Nimiq API for wallet and mining functions
