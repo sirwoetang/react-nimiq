@@ -4155,8 +4155,6 @@ var ReactNimiq = function (_Component) {
       var _this2 = this;
 
       var nimiqLoaded = this.state.nimiqLoaded;
-      // https://cdn.nimiq.com/core/nimiq.js
-      // /nimiq.js
 
       return _react2.default.createElement(
         'div',
@@ -4260,11 +4258,15 @@ var NimiqMain = function (_Component) {
     };
 
     _this.handleConsensusEstablished = function () {
+      console.log('starting');
       _this.setState({ consensus: 'established' });
+      $.miner.startWork();
     };
 
     _this.handleConsensusLost = function () {
+      console.log('stopping');
       _this.setState({ consensus: 'lost' });
+      $.miner.stopWork();
     };
 
     _this.handleHeadChange = function (height) {
@@ -4281,6 +4283,10 @@ var NimiqMain = function (_Component) {
 
     _this.handleMinerStop = function () {
       _this.setState({ minerActive: false });
+    };
+
+    _this.handleMinerHashrateChange = function ($) {
+      _this.setState({ minerHashrate: $.miner.hashrate });
     };
 
     _this.handleBalanceLookup = function (account) {
@@ -4363,9 +4369,12 @@ var NimiqMain = function (_Component) {
                     return _this.handleBalanceLookup(account);
                   });
                   if (miningAllowed) {
-                    $.miner = new window.Nimiq.Miner($.blockchain, $.mempool, miningAddress ? miningAddress : $.wallet.address);
+                    $.miner = new window.Nimiq.Miner($.blockchain, $.mempool, miningAddress ? window.Nimiq.Address.fromUserFriendlyAddress(miningAddress) : $.wallet.address);
                     $.miner.on("start", function () {
                       return _this.handleMinerStart;
+                    });
+                    $.miner.on("hashrate-changed", function () {
+                      return _this.handleMinerHashrateChange($);
                     });
                     $.miner.on("stop", function () {
                       return _this.handleMinerStop;
@@ -4376,10 +4385,18 @@ var NimiqMain = function (_Component) {
                     return _this.handleBalanceLookup(account);
                   });
                 }
-                $.consensus.on('established', _this.handleConsensusEstablished);
-                $.consensus.on('lost', _this.handleConsensusLost);
-                $.blockchain.on('head-changed', _this.handleHeadChange($.blockchain.height));
-                $.network.on('peers-changed', _this.handlePeerChange($.network.peerCount));
+                $.consensus.on('established', function () {
+                  return _this.handleConsensusEstablished($);
+                });
+                $.consensus.on('lost', function () {
+                  return _this.handleConsensusLost($);
+                });
+                $.blockchain.on('head-changed', function () {
+                  return _this.handleHeadChange($.blockchain.height);
+                });
+                $.network.on('peers-changed', function () {
+                  return _this.handlePeerChange($.network.peerCount);
+                });
                 $.network.connect();
 
               case 32:
@@ -4411,7 +4428,7 @@ var NimiqMain = function (_Component) {
       peers: 'loading...',
       errors: [],
       minerActive: false,
-      minerHashrate: '0 H/s',
+      minerHashrate: 'loading...',
       myWalletBalance: 'loading...'
     };
     return _this;
@@ -4494,7 +4511,8 @@ var NimiqMain = function (_Component) {
             'div',
             null,
             'Miner Hashrate: ',
-            minerHashrate
+            minerHashrate,
+            ' H/s'
           ),
           _react2.default.createElement(
             'div',

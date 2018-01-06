@@ -11,7 +11,7 @@ class NimiqMain extends Component {
       peers: 'loading...',
       errors: [],
       minerActive: false,
-      minerHashrate: '0 H/s',
+      minerHashrate: 'loading...',
       myWalletBalance: 'loading...'
     };
   }
@@ -23,10 +23,12 @@ class NimiqMain extends Component {
 
   handleConsensusEstablished = () => {
     this.setState({ consensus: 'established' })
+    $.miner.startWork();
   }
 
   handleConsensusLost = () => {
     this.setState({ consensus: 'lost' })
+    $.miner.stopWork();
   }
 
   handleHeadChange = (height) => {
@@ -43,6 +45,10 @@ class NimiqMain extends Component {
 
   handleMinerStop = () => {
     this.setState({ minerActive: false })
+  }
+
+  handleMinerHashrateChange = ($) => {
+    this.setState({ minerHashrate: $.miner.hashrate })
   }
 
   handleBalanceLookup = (account) => {
@@ -75,19 +81,22 @@ class NimiqMain extends Component {
         $.accounts.get($.wallet.address)
           .then(account => this.handleBalanceLookup(account));
         if (miningAllowed) {
-          $.miner = new window.Nimiq.Miner($.blockchain, $.mempool, miningAddress ? miningAddress : $.wallet.address);
+          $.miner = new window.Nimiq.Miner($.blockchain, $.mempool, miningAddress ?
+            window.Nimiq.Address.fromUserFriendlyAddress(miningAddress) : $.wallet.address);
           $.miner.on("start", () => this.handleMinerStart);
+          $.miner.on("hashrate-changed", () => this.handleMinerHashrateChange($));
           $.miner.on("stop", () => this.handleMinerStop);
         }
       } else {
         $.consensus.getAccount($.wallet.address)
           .then(account => this.handleBalanceLookup(account));
       }
-      $.consensus.on('established', this.handleConsensusEstablished);
-      $.consensus.on('lost', this.handleConsensusLost);
-      $.blockchain.on('head-changed', this.handleHeadChange($.blockchain.height));
-      $.network.on('peers-changed', this.handlePeerChange($.network.peerCount));
+      $.consensus.on('established', () => this.handleConsensusEstablished($));
+      $.consensus.on('lost', () => this.handleConsensusLost($));
+      $.blockchain.on('head-changed', () => this.handleHeadChange($.blockchain.height));
+      $.network.on('peers-changed', () => this.handlePeerChange($.network.peerCount));
       $.network.connect();
+
     }, (code) => {
       switch (code) {
         case window.Nimiq.ERR_WAIT:
@@ -138,7 +147,7 @@ class NimiqMain extends Component {
         <div>Mining Address: {miningAddress}</div>
         <div>Mining Allowed: {miningAllowed ? 'Yes' : 'No'}</div>
         <div>Miner Active: {minerActive ? 'Yes' : 'No'}</div>
-        <div>Miner Hashrate: {minerHashrate}</div>
+        <div>Miner Hashrate: {minerHashrate} H/s</div>
         <div>Consensus: {consensus}</div>
         <div>Head: {head}</div>
         <div>Peers: {peers}</div>
