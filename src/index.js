@@ -5,33 +5,50 @@ import NimiqMain from './NimiqMain.js'
 class ReactNimiq extends Component {
   constructor (props) {
     super(props);
-    this.state = { nimiqLoaded: false };
+    this.state = {
+      nimiqLoaded: false,
+      robohashJSLoaded: false,
+      robohashSVGLoaded: false,
+    };
   }
 
   handleNimiqLoaded = () => {
     this.setState({ nimiqLoaded: true })
   }
+  handleRobohashJSLoaded = () => {
+    this.setState({ robohashJSLoaded: true })
+  }
 
-  handleNimiqError = (e) => {
-    this.setState({ nimiqError: e, nimiqLoaded: false })
+  handleError = (e) => {
+    this.setState({ nimiqError: e })
   }
 
   render () {
-    const { nimiqLoaded } = this.state
+    const { nimiqLoaded, robohashJSLoaded } = this.state
     return (
       <div>
-        {nimiqLoaded ?
+        {nimiqLoaded && robohashJSLoaded ?
           <NimiqMain
             miningAddress={this.props.miningAddress}
             miningAllowed={this.props.miningAllowed}
             clientType={this.props.clientType}
             displayWidget={this.props.displayWidget}
           />
-          : <Script
-            url="https://cdn.nimiq.com/core/nimiq.js"
-            onLoad={this.handleNimiqLoaded}
-            onError={(e) => this.handleNimiqError(e)}
-          />}
+          :
+          <div>
+            {/*In the absence of NPM packages, we must make do.*/}
+            <Script
+              url="https://cdn.nimiq.com/core/nimiq.js"
+              onLoad={this.handleNimiqLoaded}
+              onError={(e) => this.handleError(e)}
+            />
+            <Script
+              url="https://cdn.rawgit.com/sirwoetang/robohash/master/src/js/robohash.js"
+              onLoad={this.handleRobohashJSLoaded}
+              onError={(e) => this.handleError(e)}
+            />
+          </div>
+        }
       </div>
     );
   }

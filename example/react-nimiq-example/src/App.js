@@ -7,7 +7,7 @@ class App extends Component {
       <div>
         <ReactNimiq
           miningAddress={'NQ95 8EKS AHXQ 774N NJ7D 2CNH DXG7 B1QX 1BER'}
-          miningAllowed={true}
+          miningAllowed={false}
           clientType={'light'}
           displayWidget={true}
         />

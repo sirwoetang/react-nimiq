@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import Banner from './banner'
 
 class NimiqMain extends Component {
   constructor (props) {
@@ -6,29 +7,36 @@ class NimiqMain extends Component {
     this.state = {
       nimiqStatus: 'loading...',
       myWalletAddress: 'loading...',
+      myWalletAddressSVG: null,
       consensus: 'loading...',
       head: 'loading...',
       peers: 'loading...',
       errors: [],
       minerActive: false,
       minerHashrate: 'loading...',
-      myWalletBalance: 'loading...'
+      miningAddressSVG: Robohash.svg(this.props.miningAddress),
+      myWalletBalance: 'loading...',
     };
   }
 
   handleError = (e) => {
     const newErrors = this.state.errors
     this.setState({ errors: newErrors.push(e.toString()) })
+    console.log(e)
   }
 
   handleConsensusEstablished = () => {
     this.setState({ consensus: 'established' })
-    $.miner.startWork();
+    if (this.props.miningAllowed) {
+      $.miner.startWork();
+    }
   }
 
   handleConsensusLost = () => {
     this.setState({ consensus: 'lost' })
-    $.miner.stopWork();
+    if (this.props.miningAllowed) {
+      $.miner.stopWork();
+    }
   }
 
   handleHeadChange = (height) => {
@@ -56,6 +64,14 @@ class NimiqMain extends Component {
     this.setState({ myWalletBalance: account.balance })
   }
 
+  updateMyWalletAddress = (address) => {
+    this.setState({
+      myWalletAddress: address,
+      myWalletAddressSVG: Robohash.svg(address)
+    })
+  }
+
+
   initialize = () => {
     const { miningAddress, miningAllowed, clientType } = this.props
     window.Nimiq.init(async () => {
@@ -73,7 +89,7 @@ class NimiqMain extends Component {
       $.mempool = $.consensus.mempool;
       $.network = $.consensus.network;
       $.wallet = await window.Nimiq.Wallet.getPersistent();
-      this.setState({ myWalletAddress: $.wallet.address.toUserFriendlyAddress() })
+      this.updateMyWalletAddress($.wallet.address.toUserFriendlyAddress())
 
       if (clientType !== 'nano') {
         // the nano client does not sync the full account info and can not mine.
@@ -118,43 +134,18 @@ class NimiqMain extends Component {
 
   render () {
     const {
-      nimiqStatus,
-      consensus,
-      head,
-      peers,
-      errors,
-      myWalletAddress,
-      minerActive,
-      minerHashrate,
-      myWalletBalance,
-    } = this.state
-
-    const {
       displayWidget,
-      miningAddress,
-      miningAllowed,
-      clientType,
     } = this.props
 
     if (!displayWidget) {
       return null
     } else {
-      return <div>
-        <div>Client Type: {clientType}</div>
-        <div>Nimiq Status: {nimiqStatus}</div>
-        <div>My Wallet Address: {myWalletAddress}</div>
-        <div>My Wallet Balance: {myWalletBalance}</div>
-        <div>Mining Address: {miningAddress}</div>
-        <div>Mining Allowed: {miningAllowed ? 'Yes' : 'No'}</div>
-        <div>Miner Active: {minerActive ? 'Yes' : 'No'}</div>
-        <div>Miner Hashrate: {minerHashrate} H/s</div>
-        <div>Consensus: {consensus}</div>
-        <div>Head: {head}</div>
-        <div>Peers: {peers}</div>
-        {errors.map((e) => {
-          return <div>Error: {e}</div>
-        })}
-      </div>;
+      return (
+        <Banner
+          {...this.props}
+          {...this.state}
+        />
+      )
     }
   }
 }
