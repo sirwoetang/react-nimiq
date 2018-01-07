@@ -1,6 +1,6 @@
 {
   "name": "react-nimiq",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "React wrapper for the official Nimiq API for mining and wallet functions.",
   "main": "build/index.js",
   "license": "MIT",
@@ -18,7 +18,7 @@
     "build": "webpack"
   },
   "author": {
-    "name": "Sirwoetang",
+    "name": "sirwoetang",
     "email": "wakkerakker@gmail.com"
   },
   "devDependencies": {
