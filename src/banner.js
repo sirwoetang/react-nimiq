@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import bannerStyle from './style'
 import Logo from './nimiq_logo.svg'
+import RobohashSVG from './robohash.min.svg'
 
 class Banner extends Component {
   render () {

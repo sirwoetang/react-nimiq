@@ -61,7 +61,7 @@ module.exports =
 /******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
 /******/
 /******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
+/******/ 	__webpack_require__.p = "/public";
 /******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(__webpack_require__.s = 343);
@@ -4552,6 +4552,14 @@ Logo.defaultProps = {
   width: '34',
   height: '30',
   viewBox: '0 0 34 30'
+};
+
+var RobohashSVG = function RobohashSVG(props) {
+  return _react2.default.createElement('svg', props);
+};
+
+RobohashSVG.defaultProps = {
+  xmlns: 'http://www.w3.org/2000/svg'
 };
 
 var Banner = function (_Component) {
