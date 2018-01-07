@@ -43,7 +43,7 @@ class ReactNimiq extends Component {
               onError={(e) => this.handleError(e)}
             />
             <Script
-              url="https://cdn.rawgit.com/sirwoetang/robohash/master/src/js/robohash.js"
+              url="https://rawgit.com/sirwoetang/robohash/master/src/js/robohash.js"
               onLoad={this.handleRobohashJSLoaded}
               onError={(e) => this.handleError(e)}
             />
