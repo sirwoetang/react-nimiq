@@ -5175,9 +5175,9 @@ react-load-script@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/react-load-script/-/react-load-script-0.0.6.tgz#db6851236aaa25bb622677a2eb51dad4f8d2c258"
 
-react-nimiq@0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/react-nimiq/-/react-nimiq-0.1.0.tgz#b60f5d3d9c5745d55ad89bc0d237965835d102b5"
+react-nimiq@0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/react-nimiq/-/react-nimiq-0.1.1.tgz#9570effe7d10c9d39270e736eec09e187292d4b1"
   dependencies:
     babel-plugin-inline-react-svg "^0.5.2"
     react "^15.5.4"
