@@ -71,7 +71,6 @@ class NimiqMain extends Component {
     })
   }
 
-
   initialize = () => {
     const { miningAddress, miningAllowed, clientType } = this.props
     window.Nimiq.init(async () => {
@@ -129,7 +128,9 @@ class NimiqMain extends Component {
   }
 
   componentDidMount () {
-    this.initialize()
+    if (this.props.walletAllowed) {
+      this.initialize()
+    }
   }
 
   render () {

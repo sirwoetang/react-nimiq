@@ -28,13 +28,7 @@ class ReactNimiq extends Component {
     return (
       <div>
         {nimiqLoaded && robohashJSLoaded ?
-          <NimiqMain
-            miningAddress={this.props.miningAddress}
-            miningAllowed={this.props.miningAllowed}
-            clientType={this.props.clientType}
-            displayWidget={this.props.displayWidget}
-          />
-          :
+          <NimiqMain {...this.props}/> :
           <div>
             {/*In the absence of NPM packages, we must make do.*/}
             <Script

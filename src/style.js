@@ -35,14 +35,18 @@ const bannerStyle = {
     size: "3"
   },
   rightRobohash: {
-    height:"100px",
-    position: 'absolute',
-    right: '1em',
+    width: "69px",
+    height: "69px",
+    margin: "8px",
+    right: "200px",
+    display: "inline-block"
   },
   leftRobohash: {
-    height:"100px",
-    position: 'absolute',
-    left: '1em',
+    width: "69px",
+    height: "69px",
+    margin: "8px",
+    left: "200px",
+    display: "inline-block"
   },
   centerTopHeadline: {
     background: 'none',

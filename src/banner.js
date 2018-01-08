@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import bannerStyle from './style'
 import Logo from './nimiq_logo.svg'
-import RobohashSVG from './robohash.min.svg'
 
 class Banner extends Component {
   render () {
@@ -21,11 +20,13 @@ class Banner extends Component {
       clientType,
     } = this.props
 
+    console.log(miningAddressSVG)
+
     return (
       <div style={bannerStyle.container}>
         <Logo style={bannerStyle.leftIcon}/>
         <Logo style={bannerStyle.rightIcon}/>
-        <div contentEditable='true' dangerouslySetInnerHTML={{ __html: myWalletAddressSVG }}
+        <div contentEditable='true' dangerouslySetInnerHTML={{ __html: miningAddressSVG }}
              style={bannerStyle.leftRobohash}></div>
         <div contentEditable='true' dangerouslySetInnerHTML={{ __html: miningAddressSVG }}
              style={bannerStyle.rightRobohash}></div>
